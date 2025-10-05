@@ -2,7 +2,6 @@ import os
 import getpass
 import requests
 import json
-import time
 
 
 
@@ -26,18 +25,6 @@ def grab_creds():
   client_api_id = input('Please enter your user Cribl API ID: ')
   client_api_secret = getpass.getpass('Enter Cribl API Secret: ')
   return(client_api_id, client_api_secret)
-
-#----------------------------------------------------------------------
-def grab_input(base_url, cribl_auth_token, worker_group, cribl_configuration_item):
-  url = f"{base_url}/m/{worker_group}/system/inputs/{cribl_configuration_item}"
-  headers = {"Content-type": "application/json", "Authorization": "Bearer " + cribl_auth_token}
-  try:
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-      data = response.json()
-      return(data)
-  except Exception as e:
-    raise Exception(f"General exception raised while attempting to get {cribl_configuration_item} from Cribl: %s" % str(e))
 
 #----------------------------------------------------------------------
 def import_input(base_url, cribl_auth_token, worker_group, input_id, json_object):

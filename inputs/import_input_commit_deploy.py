@@ -2,6 +2,7 @@ import os
 import getpass
 import requests
 import json
+import time
 
 
 
@@ -25,6 +26,18 @@ def grab_creds():
   client_api_id = input('Please enter your user Cribl API ID: ')
   client_api_secret = getpass.getpass('Enter Cribl API Secret: ')
   return(client_api_id, client_api_secret)
+
+#----------------------------------------------------------------------
+def grab_input(base_url, cribl_auth_token, worker_group, cribl_configuration_item):
+  url = f"{base_url}/m/{worker_group}/system/inputs/{cribl_configuration_item}"
+  headers = {"Content-type": "application/json", "Authorization": "Bearer " + cribl_auth_token}
+  try:
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+      data = response.json()
+      return(data)
+  except Exception as e:
+    raise Exception(f"General exception raised while attempting to get {cribl_configuration_item} from Cribl: %s" % str(e))
 
 #----------------------------------------------------------------------
 def import_input(base_url, cribl_auth_token, worker_group, input_id, json_object):
@@ -58,6 +71,76 @@ def import_cribl_input(base_url, cribl_auth_token, worker_group, json_file):
   else:
     print("ERROR - Input Import FAILED!")
     return (False)
+
+#----------------------------------------------------------------------
+def commit_update(base_url, cribl_auth_token, worker_group, commit_msg):
+  url = f"{base_url}/m/{worker_group}/version/commit"
+  headers = { "Authorization": f"Bearer {cribl_auth_token}", "Content-Type": "application/json" }
+  data = { "effective": True, "group": f"{worker_group}", "message": "commit worker group update" }
+  try:
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    if response.status_code == 200:
+      data = response.json()
+      version = data["items"][0]["commit"]
+      return(version)
+    else:
+      return(None)
+  except Exception as e:
+    raise Exception("General exception raised while attempting to commit update: %s" % str(e))
+
+#----------------------------------------------------------------------
+def deploy_update(script_log, base_url, cribl_auth_token, worker_group, version):
+  url = f"{base_url}/master/groups/{worker_group}/deploy"
+  headers = { "Authorization": f"Bearer {cribl_auth_token}", "Content-Type": "application/json" }
+  data = {"version": version}
+  try:
+    response = requests.patch(url, headers=headers, data=json.dumps(data))
+    if response.status_code == 200:
+      data = response.json()
+      print("Worker Group Deployment Successful.")
+      return(True)
+    else:
+      return(False)
+  except Exception as e:
+    script_log.info("General exception raised while attempting to deploy update: %s" % str(e))
+    raise Exception("General exception raised while attempting to deploy update: %s" % str(e))
+
+#----------------------------------------------------------------------
+def deploy_to_worker_group(script_log, base_url, cribl_auth_token, worker_group):
+  version = commit_update(base_url, cribl_auth_token, worker_group, 'test msg')
+  if version:
+    script_log.info("Worker Group Commit Successful.")
+    print("Worker Group Commit Successful.")
+    if deploy_update(script_log, base_url, cribl_auth_token, worker_group, version):
+      script_log.info("Worker Group Deployment Successful.")
+      return(True)
+    else:
+      script_log.info("ERROR - Worker Group Deployment Failed!")
+      print("ERROR - Worker Group Deployment Failed!")
+      return(False)
+  else:
+    script_log.info("ERROR - Unable to gen version Worker Group Deployment Failed!")
+    print("ERROR - Unable to gen version Worker Group Deployment Failed!")
+    return(False)
+
+#----------------------------------------------------------------------
+def version_commit(script_log, base_url, cribl_auth_token):
+  url = f"{base_url}/version/commit"
+  headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {cribl_auth_token}'}
+  data = {'message': 'commit message'}
+  try:
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 200:
+      script_log.info("Version Successfully Commited.")
+      print("Version Successfully Commited.")
+      return (True)
+    else:
+      script_log.info("ERROR - version commit FAILED!")
+      print("ERROR - version commit FAILED!")
+      return (False)
+  except Exception as e:
+    script_log.info("General exception raised while attempting to commit version: %s" % str(e))
+    raise Exception("General exception raised while attempting to commit version: %s" % str(e))
 
 #----------------------------------------------------------------------
 def import_cribl_cloud_input(cribl_auth_token):
