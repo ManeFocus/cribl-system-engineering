@@ -4,7 +4,7 @@
 
 - <b>Cribl Rest API</b>
   - [Bearer Token](https://github.com/ManeFocus/cribl-system-engineering/tree/main/bearer%20token)
-  - [Cribl Inputs](https://github.com/ManeFocus/cribl-system-engineering/tree/main/bearer%20token)
+  - [Cribl Inputs](https://github.com/ManeFocus/cribl-system-engineering/tree/main/inputs))
 - <b>Full Stack Web App (React, NodeJS, Azure, and Machine Learning Components)</b>
   - [Image Analysis Middleware](https://github.com/joshmadakor1/4chan-Image-Analysis-Middleware-C964) <b><i>(Potentially NSFW)</b></i>
 
