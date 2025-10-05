@@ -40,26 +40,40 @@ def grab_input(base_url, cribl_auth_token, worker_group, cribl_configuration_ite
     raise Exception(f"General exception raised while attempting to get {cribl_configuration_item} from Cribl: %s" % str(e))
 
 #----------------------------------------------------------------------
-def list_inputs(json_data):
-  for item in json_data["items"]:
-    print(item["id"])
+def import_input(base_url, cribl_auth_token, worker_group, input_id, json_object):
+  url = f"{base_url}/m/{worker_group}/system/inputs"
+  print(url)
+  headers = {"Content-type": "application/json", "Authorization": "Bearer " + cribl_auth_token}
+  try:
+    response = requests.post(url, headers=headers, json=json_object)
+    if response.status_code == 200:
+      data = response.json()
+      return(True)
+    else:
+      return(False)
+  except Exception as e:
+    raise Exception(f"General exception raised while attempting to get {input_id} from Cribl: %s" % str(e))
+    return (False)
+ 
+#----------------------------------------------------------------------
+def import_cribl_input(base_url, cribl_auth_token, worker_group, json_file):
+  if not os.path.exists(json_file):
+    print(f"FIle NOT found: {json_file}")
+    return(False)
+  
+  with open(json_file, "r") as jfile:
+    json_object = json.load(jfile)
+  input_id = json_file.split('\\')[-1].split('/')[-1].split('.')[0]
+  print(input_id)
+  if import_input(base_url, cribl_auth_token, worker_group, input_id, json_object):
+    print("Input Successfully Imported.")
+    return (True)
+  else:
+    print("ERROR - Input Import FAILED!")
+    return (False)
 
 #----------------------------------------------------------------------
-def write_json_file(input_id, target_directory, json_data):
-  json_file = target_directory + '/' + input_id + '.json'
-  with open(json_file, 'w') as jfile:
-    json.dump(json_data, jfile, indent=4)
-  print(f"  Data has been written to {json_file}")
-
-#----------------------------------------------------------------------
-def export_input(worker_group, input_id, json_data):
-  TS = time.strftime('%Y%m%d%H%M%S')
-  target_directory = f"backup/{TS}/{worker_group}/inputs"
-  os.makedirs(target_directory)
-  write_json_file(input_id, target_directory, json_data)
-
-#----------------------------------------------------------------------
-def import_cribl_input(cribl_auth_token):
+def import_cribl_cloud_input(cribl_auth_token):
   instance_url = input('Please enter your Cribl Instance URL: ')
   base_url = f"{instance_url}/api/v1"
   print(base_url)
@@ -67,8 +81,7 @@ def import_cribl_input(cribl_auth_token):
   print(worker_group)
   json_file = input('Enter Input Json File: ')
   print(json_file)
-#  inputs_json = grab_input(base_url, cribl_auth_token, worker_group, input_id)
-#  export_input(worker_group, input_id, inputs_json["items"][0])
+  import_cribl_input(base_url, cribl_auth_token, worker_group, json_file)
 
 #----------------------------------------------------------------------
 def main():
@@ -76,7 +89,7 @@ def main():
     if client_api_id and client_api_secret:
       cribl_auth_token = gen_cloud_token(client_api_id, client_api_secret)
       if cribl_auth_token:
-        import_cribl_input(cribl_auth_token)
+        import_cribl_cloud_input(cribl_auth_token)
       else:
         print('\n  Bearer Token Creation FAILED!\n')
 

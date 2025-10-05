@@ -40,11 +40,6 @@ def grab_input(base_url, cribl_auth_token, worker_group, cribl_configuration_ite
     raise Exception(f"General exception raised while attempting to get {cribl_configuration_item} from Cribl: %s" % str(e))
 
 #----------------------------------------------------------------------
-def list_inputs(json_data):
-  for item in json_data["items"]:
-    print(item["id"])
-
-#----------------------------------------------------------------------
 def write_json_file(input_id, target_directory, json_data):
   json_file = target_directory + '/' + input_id + '.json'
   with open(json_file, 'w') as jfile:
