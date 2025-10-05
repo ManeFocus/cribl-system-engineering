@@ -73,7 +73,7 @@ def import_cribl_input(base_url, cribl_auth_token, worker_group, json_file):
     return (False)
 
 #----------------------------------------------------------------------
-def commit_update(base_url, cribl_auth_token, worker_group, commit_msg):
+def commit_update(base_url, cribl_auth_token, worker_group):
   url = f"{base_url}/m/{worker_group}/version/commit"
   headers = { "Authorization": f"Bearer {cribl_auth_token}", "Content-Type": "application/json" }
   data = { "effective": True, "group": f"{worker_group}", "message": "commit worker group update" }
@@ -89,7 +89,7 @@ def commit_update(base_url, cribl_auth_token, worker_group, commit_msg):
     raise Exception("General exception raised while attempting to commit update: %s" % str(e))
 
 #----------------------------------------------------------------------
-def deploy_update(script_log, base_url, cribl_auth_token, worker_group, version):
+def deploy_update(base_url, cribl_auth_token, worker_group, version):
   url = f"{base_url}/master/groups/{worker_group}/deploy"
   headers = { "Authorization": f"Bearer {cribl_auth_token}", "Content-Type": "application/json" }
   data = {"version": version}
@@ -102,44 +102,36 @@ def deploy_update(script_log, base_url, cribl_auth_token, worker_group, version)
     else:
       return(False)
   except Exception as e:
-    script_log.info("General exception raised while attempting to deploy update: %s" % str(e))
     raise Exception("General exception raised while attempting to deploy update: %s" % str(e))
 
 #----------------------------------------------------------------------
-def deploy_to_worker_group(script_log, base_url, cribl_auth_token, worker_group):
-  version = commit_update(base_url, cribl_auth_token, worker_group, 'test msg')
+def deploy_to_worker_group(base_url, cribl_auth_token, worker_group):
+  version = commit_update(base_url, cribl_auth_token, worker_group)
   if version:
-    script_log.info("Worker Group Commit Successful.")
     print("Worker Group Commit Successful.")
-    if deploy_update(script_log, base_url, cribl_auth_token, worker_group, version):
-      script_log.info("Worker Group Deployment Successful.")
+    if deploy_update(base_url, cribl_auth_token, worker_group, version):
       return(True)
     else:
-      script_log.info("ERROR - Worker Group Deployment Failed!")
       print("ERROR - Worker Group Deployment Failed!")
       return(False)
   else:
-    script_log.info("ERROR - Unable to gen version Worker Group Deployment Failed!")
     print("ERROR - Unable to gen version Worker Group Deployment Failed!")
     return(False)
 
 #----------------------------------------------------------------------
-def version_commit(script_log, base_url, cribl_auth_token):
+def version_commit(base_url, cribl_auth_token):
   url = f"{base_url}/version/commit"
   headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {cribl_auth_token}'}
   data = {'message': 'commit message'}
   try:
     response = requests.post(url, headers=headers, json=data)
     if response.status_code == 200:
-      script_log.info("Version Successfully Commited.")
       print("Version Successfully Commited.")
       return (True)
     else:
-      script_log.info("ERROR - version commit FAILED!")
       print("ERROR - version commit FAILED!")
       return (False)
   except Exception as e:
-    script_log.info("General exception raised while attempting to commit version: %s" % str(e))
     raise Exception("General exception raised while attempting to commit version: %s" % str(e))
 
 #----------------------------------------------------------------------
@@ -151,7 +143,9 @@ def import_cribl_cloud_input(cribl_auth_token):
   print(worker_group)
   json_file = input('Enter Input Json File: ')
   print(json_file)
-  import_cribl_input(base_url, cribl_auth_token, worker_group, json_file)
+  if import_cribl_input(base_url, cribl_auth_token, worker_group, json_file):
+    if deploy_to_worker_group(base_url, cribl_auth_token, worker_group):
+      version_commit(base_url, cribl_auth_token)
 
 #----------------------------------------------------------------------
 def main():
