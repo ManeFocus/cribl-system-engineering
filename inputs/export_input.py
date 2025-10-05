@@ -59,7 +59,7 @@ def export_input(worker_group, input_id, json_data):
   write_json_file(input_id, target_directory, json_data)
 
 #----------------------------------------------------------------------
-def list_cribl_inputs(cribl_auth_token):
+def export_cribl_input(cribl_auth_token):
   instance_url = input('Please enter your Cribl Instance URL: ')
   base_url = f"{instance_url}/api/v1"
   print(base_url)
@@ -67,8 +67,8 @@ def list_cribl_inputs(cribl_auth_token):
   print(worker_group)
   input_id = input('Enter Worker Group Input: ')
   print(input_id)
-  inputs_json = grab_input(base_url, cribl_auth_token, worker_group, input_id)
-  export_input(worker_group, input_id, inputs_json["items"][0])
+  input_json = grab_input(base_url, cribl_auth_token, worker_group, input_id)
+  export_input(worker_group, input_id, input_json["items"][0])
 
 #----------------------------------------------------------------------
 def main():
@@ -76,7 +76,7 @@ def main():
     if client_api_id and client_api_secret:
       cribl_auth_token = gen_cloud_token(client_api_id, client_api_secret)
       if cribl_auth_token:
-        list_cribl_inputs(cribl_auth_token)
+        export_cribl_input(cribl_auth_token)
       else:
         print('\n  Bearer Token Creation FAILED!\n')
 
