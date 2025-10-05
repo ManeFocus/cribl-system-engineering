@@ -1,0 +1,66 @@
+{
+    "id": "test_input",
+    "disabled": false,
+    "sendToRoutes": true,
+    "pqEnabled": false,
+    "streamtags": [],
+    "host": "0.0.0.0",
+    "maxBufferSize": 1000,
+    "ipWhitelistRegex": "/.*/",
+    "timestampTimezone": "local",
+    "singleMsgUdpPackets": false,
+    "enableProxyHeader": false,
+    "keepFieldsList": [],
+    "octetCounting": false,
+    "inferFraming": true,
+    "strictlyInferOctetCounting": true,
+    "allowNonStandardAppName": false,
+    "maxActiveCxn": 1000,
+    "socketIdleTimeout": 0,
+    "socketEndingMaxWait": 30,
+    "socketMaxLifespan": 0,
+    "tls": {
+        "disabled": true
+    },
+    "enableLoadBalancing": false,
+    "type": "syslog",
+    "udpPort": 6514,
+    "tcpPort": 6514,
+    "status": {
+        "health": "Green",
+        "timestamp": 1759024723495,
+        "metrics": {
+            "items": [
+                {
+                    "name": "UDP",
+                    "address": "0.0.0.0:6514",
+                    "status": {
+                        "health": "Green",
+                        "timestamp": 1759024723495,
+                        "metrics": {
+                            "received": 0,
+                            "dropped": 0,
+                            "buffered": 0
+                        }
+                    }
+                },
+                {
+                    "name": "TCP",
+                    "address": "0.0.0.0:6514",
+                    "status": {
+                        "health": "Green",
+                        "timestamp": 1759024723495,
+                        "metrics": {
+                            "activeSockets": 0,
+                            "received": 0,
+                            "activeBreakers": 0,
+                            "broken": 0
+                        }
+                    }
+                }
+            ],
+            "count": 2
+        }
+    },
+    "notifications": []
+}
